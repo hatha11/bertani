@@ -1,0 +1,46 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y python3-pip zip unzip openjdk-17-jdk
+        pip install --upgrade pip
+        pip install cython virtualenv
+
+    - name: Install Buildozer
+      run: |
+        pip install buildozer
+        sudo apt install -y \
+          git zip unzip openjdk-17-jdk \
+          python3-pip python3-setuptools \
+          python3-wheel python3-virtualenv \
+          libncurses5 libstdc++6 libffi-dev \
+          libssl-dev
+
+    - name: Build APK
+      run: |
+        buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: bertani-app
+        path: bin/*.apk
